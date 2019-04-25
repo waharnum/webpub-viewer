@@ -33,6 +33,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 define("Annotator", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -273,6 +283,7 @@ define("BookSettings", ["require", "exports", "HTMLUtilities", "IconLib"], funct
         BookSettings.prototype.renderControls = function (element) {
             var sections = [];
             if (this.bookFonts.length > 1) {
+                console.log("bookFonts logging:", this.bookFonts);
                 var fontOptions = this.bookFonts.map(function (bookFont) {
                     return optionTemplate("reading-style", bookFont.name, bookFont.label, "menuitem", IconLib.icons.checkDupe, bookFont.label);
                 });
@@ -869,6 +880,28 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
         return ColumnsPaginatedBookView;
     }());
     exports.default = ColumnsPaginatedBookView;
+});
+define("ComicSansFont", ["require", "exports", "HTMLUtilities"], function (require, exports, HTMLUtilities) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var ComicSansFont = /** @class */ (function () {
+        function ComicSansFont() {
+            this.name = "comic-sans-font";
+            this.label = "Comic Sans";
+        }
+        ComicSansFont.prototype.start = function () {
+            var rootFrame = HTMLUtilities.findRequiredIframeElement(this.bookElement.contentDocument, "html");
+            HTMLUtilities.setAttr(rootFrame, "data-viewer-font", "comic-sans");
+            HTMLUtilities.createStylesheet(rootFrame, "comic-sans-font-internal", "* {font-family: 'Comic Sans MS', sans-serif !important;}");
+        };
+        ComicSansFont.prototype.stop = function () {
+            var rootFrame = HTMLUtilities.findRequiredIframeElement(this.bookElement.contentDocument, "html");
+            HTMLUtilities.removeAttr(rootFrame, "data-viewer-font");
+            HTMLUtilities.removeStylesheet(rootFrame, "comic-sans-font-internal");
+        };
+        return ComicSansFont;
+    }());
+    exports.default = ComicSansFont;
 });
 define("DayTheme", ["require", "exports", "HTMLUtilities"], function (require, exports, HTMLUtilities) {
     "use strict";
@@ -1500,12 +1533,13 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
     var template = "\n  <nav class=\"publication\">\n    <div class=\"controls-trigger\">\n      <button class=\"trigger\" aria-haspopup=\"true\" aria-expanded=\"true\">\n        " + IconLib.icons.menu + "\n      </button>\n    </div>\n    <div class=\"controls\">\n        " + IconLib.icons.closeOriginal + "\n        " + IconLib.icons.checkOriginal + "\n      <a href=\"#settings-control\" class=\"scrolling-suggestion\" style=\"display: none\">\n          We recommend scrolling mode for use with screen readers and keyboard navigation.\n          Go to settings to switch to scrolling mode.\n      </a>\n      <ul class=\"links top active\">\n        <li>\n          <button class=\"contents disabled\" aria-labelledby=\"contents-label\" aria-haspopup=\"true\" aria-expanded=\"false\">\n            " + IconLib.icons.toc + "\n            " + IconLib.icons.closeDupe + "\n            <span class=\"setting-text contents\" id=\"contents-label\">Contents</span>\n          </button>\n          <div class=\"contents-view controls-view inactive\" aria-hidden=\"true\"></div>\n        </li>\n        <li>\n          <button id=\"settings-control\" class=\"settings\" aria-labelledby=\"settings-label\" aria-expanded=\"false\" aria-haspopup=\"true\">\n            " + IconLib.icons.settings + "\n            " + IconLib.icons.closeDupe + "\n            <span class=\"setting-text settings\" id=\"settings-label\">Settings</span>\n          </button>\n          <div class=\"settings-view controls-view inactive\" aria-hidden=\"true\"></div>\n        </li>\n      </ul>\n    </div>\n    <!-- /controls -->\n  </nav>\n  <main style=\"overflow: hidden\" tabindex=-1>\n    <div class=\"loading\" style=\"display:none;\">\n      " + IconLib.icons.loading + "\n    </div>\n    <div class=\"error\" style=\"display:none;\">\n      <span>\n        " + IconLib.icons.error + "\n      </span>\n      <span>There was an error loading this page.</span>\n      <button class=\"go-back\">Go back</button>\n      <button class=\"try-again\">Try again</button>\n    </div>\n    <div class=\"info top\">\n      <span class=\"book-title\"></span>\n    </div>\n    <iframe allowtransparency=\"true\" title=\"book text\" style=\"border:0; overflow: hidden;\"></iframe>\n    <div class=\"info bottom\">\n      <span class=\"chapter-position\"></span>\n      <span class=\"chapter-title\"></span>\n    </div>\n  </main>\n  <nav class=\"publication\">\n    <div class=\"controls\">\n      <ul class=\"links bottom active\">\n        <li>\n          <a rel=\"prev\" class=\"disabled\" role=\"button\" aria-labelledby=\"previous-label\">\n          " + IconLib.icons.previous + "\n          <span class=\"chapter-control\" id=\"previous-label\">Previous Chapter</span>\n          </a>\n        </li>\n        <li aria-label=\"chapters\">Chapters</li>\n        <li>\n          <a rel=\"next\" class=\"disabled\" role=\"button\" aria-labelledby=\"next-label\">\n            <span class=\"chapter-control\" id =\"next-label\">Next Chapter</span>\n            " + IconLib.icons.next + "\n          </a>\n        </li>\n      </ul>\n    </div>\n    <!-- /controls -->\n  </nav>\n";
     /** Class that shows webpub resources in an iframe, with navigation controls outside the iframe. */
     var IFrameNavigator = /** @class */ (function () {
-        function IFrameNavigator(store, cacher, settings, annotator, publisher, serif, sans, day, sepia, night, paginator, scroller, eventHandler, upLinkConfig, allowFullscreen) {
+        function IFrameNavigator(store, cacher, settings, annotator, publisher, serif, sans, comicSans, day, sepia, night, paginator, scroller, eventHandler, upLinkConfig, allowFullscreen) {
             if (cacher === void 0) { cacher = null; }
             if (annotator === void 0) { annotator = null; }
             if (publisher === void 0) { publisher = null; }
             if (serif === void 0) { serif = null; }
             if (sans === void 0) { sans = null; }
+            if (comicSans === void 0) { comicSans = null; }
             if (day === void 0) { day = null; }
             if (sepia === void 0) { sepia = null; }
             if (night === void 0) { night = null; }
@@ -1524,6 +1558,7 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
             this.publisher = publisher;
             this.serif = serif;
             this.sans = sans;
+            this.comicSans = comicSans;
             this.day = day;
             this.sepia = sepia;
             this.night = night;
@@ -1539,7 +1574,7 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            navigator = new this(config.store, config.cacher || null, config.settings, config.annotator || null, config.publisher || null, config.serif || null, config.sans || null, config.day || null, config.sepia || null, config.night || null, config.paginator || null, config.scroller || null, config.eventHandler || null, config.upLink || null, config.allowFullscreen || null);
+                            navigator = new this(config.store, config.cacher || null, config.settings, config.annotator || null, config.publisher || null, config.serif || null, config.sans || null, config.comicSans || null, config.day || null, config.sepia || null, config.night || null, config.paginator || null, config.scroller || null, config.eventHandler || null, config.upLink || null, config.allowFullscreen || null);
                             return [4 /*yield*/, navigator.start(config.element, config.manifestUrl)];
                         case 1:
                             _a.sent();
@@ -1584,6 +1619,7 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
                             this.isBeingStyled = true;
                             this.isLoading = true;
                             this.setupEvents();
+                            console.log("this", this);
                             if (this.publisher) {
                                 this.publisher.bookElement = this.iframe;
                             }
@@ -1592,6 +1628,11 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
                             }
                             if (this.sans) {
                                 this.sans.bookElement = this.iframe;
+                            }
+                            if (this.comicSans) {
+                                console.log("this.comicSans");
+                                this.comicSans.bookElement = this.iframe;
+                                console.log("this.comicSans", this.comicSans);
                             }
                             if (this.day) {
                                 this.day.bookElement = this.iframe;
@@ -2444,7 +2485,7 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
                 var newResource = readingPosition.resource.slice(0, readingPosition.resource.indexOf("#"));
                 if (newResource === this.iframe.src) {
                     // The resource isn't changing, but handle it like a new
-                    // iframe load to hide the menus and popups and go to the 
+                    // iframe load to hide the menus and popups and go to the
                     // new element.
                     this.handleIFrameLoad();
                 }
@@ -2504,6 +2545,200 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
         return IFrameNavigator;
     }());
     exports.default = IFrameNavigator;
+});
+// Heavily inspired by https://github.com/GoogleChromeLabs/page-lifecycle
+define("Lifecycle", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    // Note: The module currently is using Event and Event Target shims by default, and doesn’t check if constructable events are supported
+    var EventShim = /** @class */ (function () {
+        function EventShim(type) {
+            this.type = type;
+        }
+        return EventShim;
+    }());
+    var EventTargetShim = /** @class */ (function () {
+        function EventTargetShim() {
+            this._registry = {};
+        }
+        EventTargetShim.prototype.addEventListener = function (type, listener) {
+            this.getRegistry(type).push(listener);
+        };
+        EventTargetShim.prototype.removeEventListener = function (type, listener) {
+            var typeRegistry = this.getRegistry(type);
+            var handlerIndex = typeRegistry.indexOf(listener);
+            if (handlerIndex > -1) {
+                typeRegistry.splice(handlerIndex, 1);
+            }
+        };
+        EventTargetShim.prototype.dispatchEvent = function (evt) {
+            evt.target = this;
+            Object.freeze(evt);
+            this.getRegistry(evt.type).forEach(function (listener) { return listener(evt); });
+            return true;
+        };
+        EventTargetShim.prototype.getRegistry = function (type) {
+            return this._registry[type] = (this._registry[type] || []);
+        };
+        return EventTargetShim;
+    }());
+    var StateChangeEvent = /** @class */ (function (_super) {
+        __extends(StateChangeEvent, _super);
+        function StateChangeEvent(type, initDict) {
+            var _this = _super.call(this, type) || this;
+            _this.newState = initDict.newState;
+            _this.oldState = initDict.oldState;
+            _this.originalEvent = initDict.originalEvent;
+            return _this;
+        }
+        return StateChangeEvent;
+    }(EventShim));
+    exports.StateChangeEvent = StateChangeEvent;
+    var SUPPORTS_PAGE_TRANSITION_EVENTS = "onpageshow" in self;
+    var IS_SAFARI = (typeof window.safari === "object" && window.safari.pushNotification);
+    var toIndexedObject = function (arr) { return arr.reduce(function (acc, val, idx) {
+        acc[val] = idx;
+        return acc;
+    }, {}); };
+    var Lifecycle = /** @class */ (function (_super) {
+        __extends(Lifecycle, _super);
+        function Lifecycle() {
+            var _this = _super.call(this) || this;
+            _this.getLegalStateTransitionPath = function (oldState, newState) {
+                for (var order = void 0, i = 0; order = Lifecycle.LEGAL_STATE_TRANSITIONS[i]; ++i) {
+                    var oldIndex = order[oldState];
+                    var newIndex = order[newState];
+                    if (oldIndex >= 0 &&
+                        newIndex >= 0 &&
+                        newIndex > oldIndex) {
+                        return Object.keys(order).slice(oldIndex, newIndex + 1);
+                    }
+                }
+                return [];
+            };
+            // Note: Model was simplified due to the lack of "passive" support
+            _this.getCurrentState = function () {
+                if (document.visibilityState === Lifecycle.HIDDEN) {
+                    return Lifecycle.HIDDEN;
+                }
+                return Lifecycle.ACTIVE;
+            };
+            _this._state = _this.getCurrentState();
+            _this.handleEvents = _this.handleEvents.bind(_this);
+            Lifecycle.EVENTS.forEach(function (evt) { return addEventListener(evt, _this.handleEvents, true); });
+            if (IS_SAFARI) {
+                addEventListener("beforeunload", function (evt) {
+                    _this._safariBeforeUnloadTimeout = setTimeout(function () {
+                        if (!(evt.defaultPrevented || !evt.returnValue)) {
+                            _this.dispatchChangesIfNeeded(evt, Lifecycle.HIDDEN);
+                        }
+                    }, 0);
+                });
+            }
+            return _this;
+        }
+        Object.defineProperty(Lifecycle.prototype, "state", {
+            get: function () {
+                return this._state;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Lifecycle.prototype, "pageWasDiscarded", {
+            get: function () {
+                return document.wasDiscarded || false;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Lifecycle.prototype.dispatchChangesIfNeeded = function (originalEvent, newState) {
+            if (newState !== this._state) {
+                var oldState = this._state;
+                var path = this.getLegalStateTransitionPath(oldState, newState);
+                for (var i = 0; i < path.length - 1; ++i) {
+                    var oldState_1 = path[i];
+                    var newState_1 = path[i + 1];
+                    this._state = newState_1;
+                    this.dispatchEvent(new StateChangeEvent("statechange", {
+                        oldState: oldState_1,
+                        newState: newState_1,
+                        originalEvent: originalEvent,
+                    }));
+                }
+            }
+        };
+        Lifecycle.prototype.handleEvents = function (evt) {
+            if (IS_SAFARI) {
+                clearTimeout(this._safariBeforeUnloadTimeout);
+            }
+            // Note: model was simplified due to the lack of "passive" support
+            switch (evt.type) {
+                case "pageshow":
+                case "resume":
+                    this.dispatchChangesIfNeeded(evt, this.getCurrentState());
+                    break;
+                case "focus":
+                    if (this._state !== Lifecycle.ACTIVE) {
+                        this.dispatchChangesIfNeeded(evt, Lifecycle.ACTIVE);
+                    }
+                    break;
+                case "blur":
+                    // The `blur` event can fire while the page is being unloaded, so we
+                    // only need to update the state if the current state is "active".
+                    if (this._state === Lifecycle.ACTIVE) {
+                        this.dispatchChangesIfNeeded(evt, this.getCurrentState());
+                    }
+                    break;
+                case "pagehide":
+                case "unload":
+                    this.dispatchChangesIfNeeded(evt, evt.persisted ? Lifecycle.FROZEN : Lifecycle.TERMINATED);
+                    break;
+                case "visibilitychange":
+                    // The document's `visibilityState` will change to hidden  as the page
+                    // is being unloaded, but in such cases the lifecycle state shouldn't
+                    // change.
+                    if (this._state !== Lifecycle.FROZEN &&
+                        this._state !== Lifecycle.TERMINATED) {
+                        this.dispatchChangesIfNeeded(evt, this.getCurrentState());
+                    }
+                    break;
+                case "freeze":
+                    this.dispatchChangesIfNeeded(evt, Lifecycle.FROZEN);
+                    break;
+            }
+        };
+        Lifecycle.ACTIVE = "active";
+        //  private static readonly PASSIVE = "passive";
+        Lifecycle.HIDDEN = "hidden";
+        Lifecycle.FROZEN = "frozen";
+        Lifecycle.TERMINATED = "terminated";
+        // Note: Passive is missing in the transitions below
+        Lifecycle.LEGAL_STATE_TRANSITIONS = [
+            // The normal unload process (bfcache process is addressed above).
+            [Lifecycle.ACTIVE, Lifecycle.HIDDEN, Lifecycle.TERMINATED],
+            // An active page transitioning to frozen,
+            // or an unloading page going into the bfcache.
+            [Lifecycle.ACTIVE, Lifecycle.HIDDEN, Lifecycle.FROZEN],
+            // A hidden page transitioning back to active.
+            [Lifecycle.HIDDEN, Lifecycle.ACTIVE],
+            // A frozen page being resumed
+            [Lifecycle.FROZEN, Lifecycle.HIDDEN],
+            // A frozen (bfcached) page navigated back to
+            // Note: [FROZEN, HIDDEN] can happen here, but it's already covered above.
+            [Lifecycle.FROZEN, Lifecycle.ACTIVE]
+        ].map(toIndexedObject);
+        Lifecycle.EVENTS = [
+            "focus",
+            "blur",
+            "visibilitychange",
+            "freeze",
+            "resume",
+            "pageshow",
+            SUPPORTS_PAGE_TRANSITION_EVENTS ? "pagehide" : "unload",
+        ];
+        return Lifecycle;
+    }(EventTargetShim));
+    exports.Lifecycle = Lifecycle;
 });
 define("LocalAnnotator", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -2809,12 +3044,12 @@ define("ServiceWorkerCacher", ["require", "exports", "Cacher", "Manifest"], func
     }());
     exports.default = ServiceWorkerCacher;
 });
-define("app", ["require", "exports", "LocalStorageStore", "ServiceWorkerCacher", "IFrameNavigator", "PublisherFont", "SerifFont", "SansFont", "DayTheme", "SepiaTheme", "NightTheme", "ColumnsPaginatedBookView", "ScrollingBookView", "BookSettings", "LocalAnnotator"], function (require, exports, LocalStorageStore_1, ServiceWorkerCacher_1, IFrameNavigator_1, PublisherFont_1, SerifFont_1, SansFont_1, DayTheme_1, SepiaTheme_1, NightTheme_1, ColumnsPaginatedBookView_1, ScrollingBookView_1, BookSettings_1, LocalAnnotator_1) {
+define("app", ["require", "exports", "LocalStorageStore", "ServiceWorkerCacher", "IFrameNavigator", "PublisherFont", "SerifFont", "SansFont", "ComicSansFont", "DayTheme", "SepiaTheme", "NightTheme", "ColumnsPaginatedBookView", "ScrollingBookView", "BookSettings", "LocalAnnotator"], function (require, exports, LocalStorageStore_1, ServiceWorkerCacher_1, IFrameNavigator_1, PublisherFont_1, SerifFont_1, SansFont_1, ComicSansFont_1, DayTheme_1, SepiaTheme_1, NightTheme_1, ColumnsPaginatedBookView_1, ScrollingBookView_1, BookSettings_1, LocalAnnotator_1) {
     "use strict";
     var _this = this;
     Object.defineProperty(exports, "__esModule", { value: true });
     var app = function (element, manifestUrl) { return __awaiter(_this, void 0, void 0, function () {
-        var bookStore, cacher, annotator, publisher, serif, sans, fontSizes, day, sepia, night, paginator, scroller, settingsStore, settings;
+        var bookStore, cacher, annotator, publisher, serif, sans, comicSans, fontSizes, day, sepia, night, paginator, scroller, settingsStore, settings;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -2824,6 +3059,7 @@ define("app", ["require", "exports", "LocalStorageStore", "ServiceWorkerCacher",
                     publisher = new PublisherFont_1.default();
                     serif = new SerifFont_1.default();
                     sans = new SansFont_1.default();
+                    comicSans = new ComicSansFont_1.default();
                     fontSizes = [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
                     day = new DayTheme_1.default();
                     sepia = new SepiaTheme_1.default();
@@ -2833,7 +3069,7 @@ define("app", ["require", "exports", "LocalStorageStore", "ServiceWorkerCacher",
                     settingsStore = new LocalStorageStore_1.default({ prefix: "cassis-reader" });
                     return [4 /*yield*/, BookSettings_1.default.create({
                             store: settingsStore,
-                            bookFonts: [publisher, serif, sans],
+                            bookFonts: [publisher, serif, sans, comicSans],
                             fontSizesInPixels: fontSizes,
                             defaultFontSizeInPixels: 20,
                             bookThemes: [day, sepia, night],
@@ -2851,6 +3087,7 @@ define("app", ["require", "exports", "LocalStorageStore", "ServiceWorkerCacher",
                             publisher: publisher,
                             serif: serif,
                             sans: sans,
+                            comicSans: comicSans,
                             day: day,
                             sepia: sepia,
                             night: night,

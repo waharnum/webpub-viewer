@@ -5,6 +5,7 @@ import { CacheStatus } from "./Cacher";
 import PublisherFont from "./PublisherFont";
 import SerifFont from "./SerifFont";
 import SansFont from "./SansFont";
+import ComicSansFont from "./ComicSansFont";
 import DayTheme from "./DayTheme";
 import SepiaTheme from "./SepiaTheme";
 import NightTheme from "./NightTheme";
@@ -135,6 +136,7 @@ export interface IFrameNavigatorConfig {
     publisher?: PublisherFont;
     serif?: SerifFont;
     sans?: SansFont;
+    comicSans?: ComicSansFont;
     day?: DayTheme;
     sepia?: SepiaTheme;
     night?: NightTheme;
@@ -155,6 +157,7 @@ export default class IFrameNavigator implements Navigator {
     private publisher: PublisherFont | null;
     private serif: SerifFont | null;
     private sans: SansFont | null;
+    private comicSans: ComicSansFont | null;
     private day: DayTheme | null;
     private sepia: SepiaTheme | null;
     private night: NightTheme | null;
@@ -195,6 +198,7 @@ export default class IFrameNavigator implements Navigator {
         const navigator = new this(
             config.store, config.cacher || null, config.settings, config.annotator || null,
             config.publisher || null, config.serif || null, config.sans || null,
+            config.comicSans || null,
             config.day || null, config.sepia || null, config.night || null,
             config.paginator || null, config.scroller || null,
             config.eventHandler || null,
@@ -214,6 +218,7 @@ export default class IFrameNavigator implements Navigator {
         publisher: PublisherFont | null = null,
         serif: SerifFont | null = null,
         sans: SansFont | null = null,
+        comicSans: ComicSansFont | null = null,
         day: DayTheme | null = null,
         sepia: SepiaTheme | null = null,
         night: NightTheme | null = null,
@@ -231,6 +236,7 @@ export default class IFrameNavigator implements Navigator {
         this.publisher = publisher;
         this.serif = serif;
         this.sans = sans;
+        this.comicSans = comicSans;
         this.day = day;
         this.sepia = sepia;
         this.night = night;
@@ -271,6 +277,8 @@ export default class IFrameNavigator implements Navigator {
             this.isLoading = true;
             this.setupEvents();
 
+            console.log("this", this)
+
             if (this.publisher) {
                 this.publisher.bookElement = this.iframe;
             }
@@ -279,6 +287,11 @@ export default class IFrameNavigator implements Navigator {
             }
             if (this.sans) {
                 this.sans.bookElement = this.iframe;
+            }
+            if (this.comicSans) {
+                console.log("this.comicSans")
+                this.comicSans.bookElement = this.iframe;
+                console.log("this.comicSans", this.comicSans);
             }
             if (this.day) {
                 this.day.bookElement = this.iframe;
@@ -531,7 +544,7 @@ export default class IFrameNavigator implements Navigator {
                         let href = "";
                         if (link.href) {
                             href = new URL(link.href, this.manifestUrl.href).href;
-                    
+
                             linkElement.href = href;
                             linkElement.innerHTML = link.title || "";
                             listItemElement.appendChild(linkElement);
@@ -841,7 +854,7 @@ export default class IFrameNavigator implements Navigator {
         this.infoTop.setAttribute("aria-hidden", "true");
         this.infoBottom.setAttribute("aria-hidden", "true");
 
-        if (control) {        
+        if (control) {
             control.setAttribute("aria-hidden", "false");
         }
         this.showElement(modal, control);
@@ -877,7 +890,7 @@ export default class IFrameNavigator implements Navigator {
                 const newIconClass = "icon inactive-icon";
                 activeIcon.setAttribute("class", newIconClass);
             }
-        
+
             if (inactiveIcon) {
                 const newIconClass = "icon active-icon";
                 inactiveIcon.setAttribute("class", newIconClass);
@@ -971,9 +984,9 @@ export default class IFrameNavigator implements Navigator {
     }
 
     private handleLeftHover(): void {
-        if (this.paginator) { 
+        if (this.paginator) {
             if (this.paginator.onFirstPage() && !this.previousChapterLink.hasAttribute("href")) {
-                this.iframe.className = ""; 
+                this.iframe.className = "";
             } else {
                 this.iframe.className = "left-hover";
             }
@@ -981,9 +994,9 @@ export default class IFrameNavigator implements Navigator {
     }
 
     private handleRightHover(): void {
-        if (this.paginator) { 
+        if (this.paginator) {
             if (this.paginator.onLastPage() && !this.nextChapterLink.hasAttribute("href")) {
-                this.iframe.className = ""; 
+                this.iframe.className = "";
             } else {
                 this.iframe.className = "right-hover";
             }
@@ -1189,7 +1202,7 @@ export default class IFrameNavigator implements Navigator {
             const newResource = readingPosition.resource.slice(0, readingPosition.resource.indexOf("#"))
             if (newResource === this.iframe.src) {
                 // The resource isn't changing, but handle it like a new
-                // iframe load to hide the menus and popups and go to the 
+                // iframe load to hide the menus and popups and go to the
                 // new element.
                 this.handleIFrameLoad();
             } else {

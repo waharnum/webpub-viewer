@@ -4,6 +4,7 @@ import IFrameNavigator from "./IFrameNavigator";
 import PublisherFont from "./PublisherFont";
 import SerifFont from "./SerifFont";
 import SansFont from "./SansFont";
+import ComicSansFont from "./ComicSansFont";
 import DayTheme from "./DayTheme";
 import SepiaTheme from "./SepiaTheme";
 import NightTheme from "./NightTheme";
@@ -19,6 +20,7 @@ const app = async (element: HTMLElement, manifestUrl: URL): Promise<IFrameNaviga
     const publisher = new PublisherFont();
     const serif = new SerifFont();
     const sans = new SansFont();
+    const comicSans = new ComicSansFont();
     const fontSizes = [ 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 ];
     const day = new DayTheme();
     const sepia = new SepiaTheme();
@@ -28,7 +30,7 @@ const app = async (element: HTMLElement, manifestUrl: URL): Promise<IFrameNaviga
     const settingsStore = new LocalStorageStore({ prefix: "cassis-reader" });
     const settings = await BookSettings.create({
         store: settingsStore,
-        bookFonts: [publisher, serif, sans],
+        bookFonts: [publisher, serif, sans, comicSans],
         fontSizesInPixels: fontSizes,
         defaultFontSizeInPixels: 20,
         bookThemes: [day, sepia, night],
@@ -44,6 +46,7 @@ const app = async (element: HTMLElement, manifestUrl: URL): Promise<IFrameNaviga
         publisher,
         serif,
         sans,
+        comicSans,
         day,
         sepia,
         night,
@@ -53,4 +56,3 @@ const app = async (element: HTMLElement, manifestUrl: URL): Promise<IFrameNaviga
 };
 
 export default app;
-
