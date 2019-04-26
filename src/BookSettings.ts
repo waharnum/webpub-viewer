@@ -154,8 +154,7 @@ export default class BookSettings {
     public renderControls(element: HTMLElement): void {
         const sections = [];
 
-        if (this.bookFonts.length > 1) {
-            console.log("bookFonts logging:", this.bookFonts);
+        if (this.bookFonts.length > 1) {            
             const fontOptions = this.bookFonts.map(bookFont =>
                 optionTemplate("reading-style", bookFont.name, bookFont.label, "menuitem", IconLib.icons.checkDupe, bookFont.label)
             );

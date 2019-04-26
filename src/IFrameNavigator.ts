@@ -277,8 +277,6 @@ export default class IFrameNavigator implements Navigator {
             this.isLoading = true;
             this.setupEvents();
 
-            console.log("this", this)
-
             if (this.publisher) {
                 this.publisher.bookElement = this.iframe;
             }
@@ -288,10 +286,8 @@ export default class IFrameNavigator implements Navigator {
             if (this.sans) {
                 this.sans.bookElement = this.iframe;
             }
-            if (this.comicSans) {
-                console.log("this.comicSans")
+            if (this.comicSans) {                
                 this.comicSans.bookElement = this.iframe;
-                console.log("this.comicSans", this.comicSans);
             }
             if (this.day) {
                 this.day.bookElement = this.iframe;
